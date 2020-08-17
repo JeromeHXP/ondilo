@@ -1,4 +1,33 @@
 /.venv
 /.vscode
-/build
-/dist
+
+# ====== #
+# Python #
+# ====== #
+__pycache__/
+.pytest_cache/
+*.py[cod]
+*.egg-info/
+.installed.cfg
+*.egg
+*.ipynb
+
+# C extensions
+*.so
+
+# Packages
+*.egg
+*.egg-info
+dist
+build
+eggs
+.eggs
+parts
+bin
+var
+sdist
+develop-eggs
+.installed.cfg
+lib
+lib64
+pip-wheel-metadata
