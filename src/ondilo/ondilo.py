@@ -8,7 +8,9 @@ API_HOST = "https://interop.ondilo.com"
 API_URL = API_HOST + "/api/customer/v1"
 ENDPOINT_TOKEN = "/oauth2/token"
 ENDPOINT_AUTHORIZE = "/oauth2/authorize"
-
+DEFAULT_CLIENT_ID = "customer_api"
+DEFAULT_CLIENT_SECRET = ""
+DEFAULT_SCOPE = "api"
 
 class OndiloError(Exception):
     pass
@@ -18,8 +20,8 @@ class Ondilo:
     def __init__(
         self,
         token: Optional[Dict[str, str]] = None,
-        client_id: str = None,
-        client_secret: str = None,
+        client_id: str = DEFAULT_CLIENT_ID,
+        client_secret: str = DEFAULT_CLIENT_SECRET,
         redirect_uri: str = None,
         token_updater: Optional[Callable[[str], None]] = None,
     ):
@@ -28,6 +30,7 @@ class Ondilo:
         self.client_secret = client_secret
         self.redirect_uri = redirect_uri
         self.token_updater = token_updater
+        self.scope = DEFAULT_SCOPE
 
         extra = {"client_id": self.client_id, "client_secret": self.client_secret}
 
@@ -37,6 +40,7 @@ class Ondilo:
             client_id=client_id,
             token=token,
             token_updater=token_updater,
+            scope=self.scope,
         )
 
     def refresh_tokens(self) -> Dict[str, Union[str, int]]:
@@ -47,6 +51,25 @@ class Ondilo:
             self.token_updater(token)
 
         return token
+
+    def request_token(
+        self,
+        authorization_response: Optional[str] = None,
+        code: Optional[str] = None,
+    ) -> Dict[str, str]:
+        """
+        Generic method for fetching an access token.
+        :param authorization_response: Authorization response URL, the callback
+                                       URL of the request back to you.
+        :param code: Authorization code
+        :return: A token dict
+        """
+        return self._oauth.fetch_token(
+            f"{self.host}{ENDPOINT_TOKEN}",
+            authorization_response=authorization_response,
+            code=code,
+            include_client_id=True,
+        )
 
     def get_authurl(self):
         """Get the URL needed for the authorization code grant flow."""
@@ -101,8 +124,24 @@ class Ondilo:
 
         return req.json()
 
-    def get_units(self):
+    def validate_pool_recommendation(self, poolId, recommendationId):
+        req = self.request("put", "/pools/" + str(poolId) + "/recommendations/" + str(recommendationId))
+
+        if req.status_code != 200:
+            raise OndiloError
+
+        return req.json()
+
+    def get_user_units(self):
         req = self.request("get", "/user/units")
+
+        if req.status_code != 200:
+            raise OndiloError
+
+        return req.json()
+
+    def get_user_info(self):
+        req = self.request("get", "/user/info")
 
         if req.status_code != 200:
             raise OndiloError
@@ -111,6 +150,14 @@ class Ondilo:
 
     def get_pool_config(self, poolId):
         req = self.request("get", "/pools/" + str(poolId) + "/configuration")
+
+        if req.status_code != 200:
+            raise OndiloError
+
+        return req.json()
+
+    def get_pool_shares(self, poolId):
+        req = self.request("get", "/pools/" + str(poolId) + "/shares")
 
         if req.status_code != 200:
             raise OndiloError

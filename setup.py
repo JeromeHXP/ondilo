@@ -4,8 +4,8 @@ with open("README.md", "r") as fh:
     long_description = fh.read()
 
 setuptools.setup(
-    name="ondilo", # Replace with your own username
-    version="0.0.1",
+    name="ondilo",
+    version="0.2.0",
     author="Jérôme Mainguet",
     author_email="dartdoka@mainguet.fr",
     description="A client to access Ondilo ICO APIs",
