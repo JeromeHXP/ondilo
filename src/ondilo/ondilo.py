@@ -165,7 +165,7 @@ class Ondilo:
         return req.json()
 
     def get_pool_histo(self, poolId, measure, period):
-        req = self.request("get", "/pools/" + str(poolId) + "/mesaures?type=" + measure + "&period=" + period)
+        req = self.request("get", "/pools/" + str(poolId) + "/measures?type=" + measure + "&period=" + period)
 
         if req.status_code != 200:
             raise OndiloError
