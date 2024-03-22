@@ -12,6 +12,7 @@ DEFAULT_CLIENT_ID = "customer_api"
 DEFAULT_CLIENT_SECRET = ""
 DEFAULT_SCOPE = "api"
 
+
 class OndiloError(Exception):
     pass
 
@@ -100,32 +101,33 @@ class Ondilo:
 
         return req.json()
 
-    def get_ICO_details(self, poolId):
-        req = self.request("get", "/pools/" + str(poolId) + "/device")
+    def get_ICO_details(self, pool_id: int):
+        req = self.request("get", "/pools/" + str(pool_id) + "/device")
 
         if req.status_code != 200:
             raise OndiloError
 
         return req.json()
 
-    def get_last_pool_measures(self, poolId):
-        req = self.request("get", "/pools/" + str(poolId) + "/lastmeasures")
+    def get_last_pool_measures(self, pool_id: int):
+        qstr = "?types[]=temperature&types[]=ph&types[]=orp&types[]=salt&types[]=battery&types[]=tds&types[]=rssi"
+        req = self.request("get", f"/pools/{str(pool_id)}/lastmeasures{qstr}")
 
         if req.status_code != 200:
             raise OndiloError
 
         return req.json()
 
-    def get_pool_recommendations(self, poolId):
-        req = self.request("get", "/pools/" + str(poolId) + "/recommendations")
+    def get_pool_recommendations(self, pool_id: int):
+        req = self.request("get", "/pools/" + str(pool_id) + "/recommendations")
 
         if req.status_code != 200:
             raise OndiloError
 
         return req.json()
 
-    def validate_pool_recommendation(self, poolId, recommendationId):
-        req = self.request("put", "/pools/" + str(poolId) + "/recommendations/" + str(recommendationId))
+    def validate_pool_recommendation(self, pool_id: int, recommendation_id: int):
+        req = self.request("put", "/pools/" + str(pool_id) + "/recommendations/" + str(recommendation_id))
 
         if req.status_code != 200:
             raise OndiloError
@@ -148,24 +150,24 @@ class Ondilo:
 
         return req.json()
 
-    def get_pool_config(self, poolId):
-        req = self.request("get", "/pools/" + str(poolId) + "/configuration")
+    def get_pool_config(self, pool_id: int):
+        req = self.request("get", "/pools/" + str(pool_id) + "/configuration")
 
         if req.status_code != 200:
             raise OndiloError
 
         return req.json()
 
-    def get_pool_shares(self, poolId):
-        req = self.request("get", "/pools/" + str(poolId) + "/shares")
+    def get_pool_shares(self, pool_id: int):
+        req = self.request("get", "/pools/" + str(pool_id) + "/shares")
 
         if req.status_code != 200:
             raise OndiloError
 
         return req.json()
 
-    def get_pool_histo(self, poolId, measure, period):
-        req = self.request("get", "/pools/" + str(poolId) + "/measures?type=" + measure + "&period=" + period)
+    def get_pool_histo(self, pool_id: int, measure, period: str):
+        req = self.request("get", "/pools/" + str(pool_id) + "/measures?type=" + measure + "&period=" + period)
 
         if req.status_code != 200:
             raise OndiloError
