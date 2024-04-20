@@ -14,10 +14,17 @@ DEFAULT_SCOPE = "api"
 
 
 class OndiloError(Exception):
-    pass
+    """Ondilo API error. Provides status code and error message from the API call"""
+    def __init__(self, status_code: int, message: str):
+        self.status_code = status_code
+        self.message = message
+
+    def __str__(self):
+        return f"{self.status_code}: {self.message}"
 
 
 class Ondilo:
+    """Ondilo API client. Handles OAuth2 authorization and API requests."""
     def __init__(
         self,
         token: Optional[Dict[str, str]] = None,
@@ -94,82 +101,186 @@ class Ondilo:
             return getattr(self._oauth, method)(url, **kwargs)
 
     def get_pools(self):
+        """Get all pools/spas associated with the user."""
         req = self.request("get", "/pools")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_ICO_details(self, pool_id: int):
+    def get_ICO_details(self, pool_id: int) -> dict:
+        """
+        Retrieves the details of an ICO device associated with a specific pool.
+
+        Args:
+            pool_id (int): The ID of the pool.
+
+        Returns:
+            dict: A dictionary containing the details of the ICO device.
+
+        Raises:
+            OndiloError: If the request to retrieve the device details fails.
+        """
         req = self.request("get", "/pools/" + str(pool_id) + "/device")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_last_pool_measures(self, pool_id: int):
+    def get_last_pool_measures(self, pool_id: int) -> dict:
+        """
+        Retrieves the last measures of a specific pool.
+
+        Args:
+            pool_id (int): The ID of the pool.
+
+        Returns:
+            dict: A dictionary containing the last measures for the pool.
+
+        Raises:
+            OndiloError: If the request to retrieve the last measures fails.
+        """
         qstr = "?types[]=temperature&types[]=ph&types[]=orp&types[]=salt&types[]=battery&types[]=tds&types[]=rssi"
         req = self.request("get", f"/pools/{str(pool_id)}/lastmeasures{qstr}")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_pool_recommendations(self, pool_id: int):
+    def get_pool_recommendations(self, pool_id: int) -> dict:
+        """
+        Retrieves the recommendations for a specific pool.
+
+        Args:
+            pool_id (int): The ID of the pool.
+
+        Returns:
+            dict: A dictionary containing the recommendations for the pool.
+
+        Raises:
+            OndiloError: If the request to retrieve the recommendations fails.
+        """
         req = self.request("get", "/pools/" + str(pool_id) + "/recommendations")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def validate_pool_recommendation(self, pool_id: int, recommendation_id: int):
+    def validate_pool_recommendation(self, pool_id: int, recommendation_id: int) -> str:
+        """
+        Validates a pool recommendation.
+
+        Args:
+            pool_id (int): The ID of the pool.
+            recommendation_id (int): The ID of the recommendation.
+
+        Returns:
+            str: The JSON response from the API. Should be "Done".
+
+        Raises:
+            OndiloError: If the API request fails.
+        """
         req = self.request("put", "/pools/" + str(pool_id) + "/recommendations/" + str(recommendation_id))
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_user_units(self):
+    def get_user_units(self) -> dict:
+        """
+        Retrieves the units of measurement for the user.
+
+        Returns:
+            A dictionary containing the user's units of measurement.
+        Raises:
+            OndiloError: If the request to retrieve the units fails.
+        """
         req = self.request("get", "/user/units")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_user_info(self):
+    def get_user_info(self) -> dict:
+        """
+        Retrieves the user information from the Ondilo API.
+
+        Returns:
+            A dictionary containing the user information.
+        Raises:
+            OndiloError: If the request to retrieve the user info fails.
+        """
         req = self.request("get", "/user/info")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_pool_config(self, pool_id: int):
+    def get_pool_config(self, pool_id: int) -> dict:
+        """
+        Retrieves the configuration of a pool.
+
+        Args:
+            pool_id (int): The ID of the pool.
+
+        Returns:
+            dict: The configuration of the pool.
+
+        Raises:
+            OndiloError: If the request to retrieve the configuration fails.
+        """
         req = self.request("get", "/pools/" + str(pool_id) + "/configuration")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_pool_shares(self, pool_id: int):
+    def get_pool_shares(self, pool_id: int) -> dict:
+        """
+        Retrieves the shares of a specific pool.
+
+        Args:
+            pool_id (int): The ID of the pool.
+
+        Returns:
+            dict: A dictionary containing the shares of the pool.
+
+        Raises:
+            OndiloError: If the request to retrieve the shares fails.
+        """
         req = self.request("get", "/pools/" + str(pool_id) + "/shares")
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
 
-    def get_pool_histo(self, pool_id: int, measure, period: str):
+    def get_pool_histo(self, pool_id: int, measure: str, period: str) -> dict:
+        """
+        Retrieves the historical data for a specific pool.
+
+        Args:
+            pool_id (int): The ID of the pool.
+            measure (str): The type of measure to retrieve.
+            period (str): The time period for the historical data. Allowed values are "day", "week", "month".
+
+        Returns:
+            dict: The historical data for the pool.
+
+        Raises:
+            OndiloError: If the request to retrieve the historical data fails.
+        """
         req = self.request("get", "/pools/" + str(pool_id) + "/measures?type=" + measure + "&period=" + period)
 
         if req.status_code != 200:
-            raise OndiloError
+            raise OndiloError(req.status_code, req.text)
 
         return req.json()
